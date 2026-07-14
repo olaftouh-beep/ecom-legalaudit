@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LegalAudit Maroc — Ecom Responsable</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F5F5F3; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+#app { width: 100%; max-width: 640px; background: white; border-radius: 16px; border: 1px solid #E5E5E3; overflow: hidden; display: flex; flex-direction: column; height: 620px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+#hdr { padding: 14px 18px; border-bottom: 1px solid #E5E5E3; display: flex; align-items: center; gap: 10px; background: white; }
+.logo { width: 34px; height: 34px; background: #0F1F2E; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #C9A84C; flex-shrink: 0; }
+.hdr-info .name { font-size: 14px; font-weight: 600; color: #0F1F2E; }
+.hdr-info .sub { font-size: 11px; color: #6B7280; }
+.dot { margin-left: auto; width: 8px; height: 8px; background: #10B981; border-radius: 50%; }
+#setup { padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+#setup .title { font-size: 16px; font-weight: 600; color: #0F1F2E; }
+#setup .desc { font-size: 13px; color: #6B7280; line-height: 1.6; }
+#setup input { width: 100%; padding: 10px 14px; border: 1px solid #E5E5E3; border-radius: 8px; font-size: 13px; color: #0F1F2E; outline: none; transition: border-color 0.2s; }
+#setup input:focus { border-color: #0F1F2E; }
+#setup button { padding: 11px 20px; background: #0F1F2E; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+#setup button:hover { background: #C9A84C; }
+#msgs { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; display: none; }
+.msg { display: flex; gap: 8px; }
+.msg.user { flex-direction: row-reverse; }
+.av { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; flex-shrink: 0; }
+.av.bot { background: #0F1F2E; color: #C9A84C; }
+.av.user { background: #EEF2FF; color: #4338CA; }
+.bub { max-width: 78%; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.65; }
+.bub.bot { background: #F9F9F7; border: 1px solid #E5E5E3; border-top-left-radius: 4px; color: #0F1F2E; }
+.bub.user { background: #0F1F2E; color: white; border-top-right-radius: 4px; }
+.ok { color: #059669; font-weight: 500; }
+.warn { color: #D97706; font-weight: 500; }
+.err { color: #DC2626; font-weight: 500; }
+.typing { display: flex; gap: 4px; padding: 10px 14px; background: #F9F9F7; border: 1px solid #E5E5E3; border-radius: 14px; border-top-left-radius: 4px; width: fit-content; }
+.typing span { width: 5px; height: 5px; background: #9CA3AF; border-radius: 50%; animation: bounce 1.2s infinite; }
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+#inp-area { padding: 12px 16px; border-top: 1px solid #E5E5E3; display: flex; gap: 8px; display: none; background: white; }
+#inp-area input { flex: 1; padding: 9px 13px; border: 1px solid #E5E5E3; border-radius: 8px; font-size: 13px; outline: none; transition: border-color 0.2s; }
+#inp-area input:focus { border-color: #0F1F2E; }
+#send { padding: 9px 16px; background: #0F1F2E; color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+#send:hover { background: #C9A84C; }
+.disc { font-size: 11px; color: #9CA3AF; text-align: center; padding: 7px; border-top: 1px solid #E5E5E3; background: white; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="hdr">
+    <div class="logo">ER</div>
+    <div class="hdr-info">
+      <div class="name">LegalAudit Maroc</div>
+      <div class="sub">Ecom Responsable · Audit de conformité</div>
+    </div>
+    <div class="dot"></div>
+  </div>
+
+  <div id="setup">
+    <div class="title">Démarrer votre audit</div>
+    <div class="desc">Collez votre clé API Gemini ci-dessous pour activer le bot. Elle reste sur votre appareil et n'est jamais partagée.</div>
+    <input type="password" id="api-key" placeholder="Votre clé API Gemini (AIza...)" />
+    <button onclick="startBot()">Démarrer l'audit →</button>
+  </div>
+
+  <div id="msgs"></div>
+
+  <div id="inp-area">
+    <input type="text" id="user-inp" placeholder="Répondez ou tapez votre message..." />
+    <button id="send">Envoyer</button>
+  </div>
+
+  <div class="disc">Diagnostic indicatif · Ecom Responsable — Omar Laftouh · linkedin.com/in/omar-laftouh</div>
+</div>
+
+<script>
+const SYSTEM = `Tu es LegalAudit Maroc, l'assistant d'audit de conformité juridique d'Ecom Responsable, créé par Omar Laftouh, juriste d'affaires spécialisé en LegalTech au Maroc.
+
+TON RÔLE : Conduire un audit de conformité juridique personnalisé pour les e-commerçants marocains, basé sur la loi 31-08 (protection du consommateur) et la loi 09-08 (protection des données personnelles).
+
+QUESTIONS D'ENTRÉE — 2 seulement :
+1. "Avez-vous un site web avec une URL ?" → Si oui, demande l'URL et analyse. Si non, questionnaire guidé.
+2. "Que vendez-vous principalement ?" → pour détecter si Famille 4 s'applique.
+
+DEUX CHEMINS :
+
+CHEMIN A — AVEC SITE (URL fournie) :
+Analyse ce que tu peux déduire du site, puis pose UNIQUEMENT les questions sur ce que tu ne peux pas détecter :
+- Déclaration CNDP faite ?
+- Message récapitulatif envoyé au moment de la livraison ?
+- Si alimentaire/médicament : autorisation ONSSA / Ministère Santé ?
+Si le RC est visible sur le site → ne pose pas la question RC.
+Si la politique de confidentialité mentionne la CNDP → ne pose pas la question CNDP.
+
+CHEMIN B — SANS SITE (WhatsApp/Instagram) :
+Questionnaire guidé sur les 4 familles.
+
+4 FAMILLES D'OBLIGATIONS :
+
+FAMILLE 1 — Données personnelles (loi 09-08) :
+🔴 Informez-vous vos clients que vous collectez leurs données ?
+🔴 Utilisez-vous ces données uniquement pour les commandes ?
+🔴 Vos clients peuvent-ils demander la suppression de leurs données ?
+🔴 Vos données clients sont-elles sécurisées ?
+🟡 Avez-vous déclaré votre activité à la CNDP ?
+
+FAMILLE 2 — Contrat / CGV (loi 31-08) :
+🔴 Informez-vous le client des délais et frais de livraison AVANT la commande ?
+🔴 Envoyez-vous un récapitulatif complet AVANT que le client confirme ? (prix, produit, délai, droit de rétractation)
+🔴 Informez-vous le client de son droit de retour 7 jours ? (Si non → délai passe à 30 jours)
+🔴 Envoyez-vous une confirmation écrite au moment de la livraison ?
+🔴 Vos conditions de paiement sont-elles claires avant la commande ?
+🟡 Avez-vous des CGV rédigées et accessibles ?
+
+EXCEPTIONS droit de rétractation : produits personnalisés, périssables, logiciels descellés.
+
+FAMILLE 3 — Mentions e-commerçant (loi 31-08) :
+🔴 Votre nom et contact sont-ils visibles sur votre page/site ?
+🔴 Avez-vous une adresse pour les réclamations ?
+🟡 Êtes-vous inscrit au registre de commerce (RC) ?
+🟡 Avez-vous un numéro fiscal ?
+
+FAMILLE 4 — Autorisations sectorielles :
+Compléments alimentaires → 🔴 Autorisation ONSSA obligatoire
+Alimentation importée → 🔴 Certificat ONSSA obligatoire
+Médicaments → 🔴 ALERTE : réservé aux pharmaciens agréés — arrêter immédiatement
+Cosmétiques → nous contacter directement
+
+LOGIQUE ADAPTATIVE :
+- Si le site révèle déjà un élément → ne pose PAS la question
+- Maximum 7 questions au total
+- Une question à la fois
+- Langage simple, sans jargon juridique
+
+RAPPORT FINAL :
+✅ Points conformes
+❌ Points non conformes → risque concret + action immédiate (🔴)
+⚠️ Points à planifier → démarche officielle (🟡)
+
+Termine TOUJOURS par :
+"Pour corriger ces points, contactez Omar Laftouh — Ecom Responsable : linkedin.com/in/omar-laftouh"
+
+RÈGLES :
+- Jamais de conseil juridique définitif
+- Pour vendeurs non déclarés : focus sur ce qu'ils peuvent faire maintenant
+- Bienveillant mais précis`;
+
+let apiKey = '';
+let history = [];
+const msgs = document.getElementById('msgs');
+const inpArea = document.getElementById('inp-area');
+const setup = document.getElementById('setup');
+const userInp = document.getElementById('user-inp');
+
+function startBot() {
+  const key = document.getElementById('api-key').value.trim();
+  if (!key || !key.startsWith('AIza')) {
+    alert('Veuillez entrer une clé API Gemini valide (commence par AIza)');
+    return;
+  }
+  apiKey = key;
+  setup.style.display = 'none';
+  msgs.style.display = 'flex';
+  inpArea.style.display = 'flex';
+  init();
+}
+
+function addMsg(role, html, isHTML = false) {
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  const av = document.createElement('div');
+  av.className = `av ${role}`;
+  av.textContent = role === 'bot' ? 'ER' : 'Vous';
+  const bub = document.createElement('div');
+  bub.className = `bub ${role}`;
+  if (isHTML) bub.innerHTML = html;
+  else bub.textContent = html;
+  div.appendChild(av);
+  div.appendChild(bub);
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const div = document.createElement('div');
+  div.className = 'msg bot';
+  div.id = 'typing';
+  div.innerHTML = '<div class="av bot">ER</div><div class="typing"><span></span><span></span><span></span></div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing');
+  if (t) t.remove();
+}
+
+function fmt(text) {
+  return text
+    .replace(/✅([^\n]*)/g, '<span class="ok">✅$1</span>')
+    .replace(/❌([^\n]*)/g, '<span class="err">❌$1</span>')
+    .replace(/⚠️([^\n]*)/g, '<span class="warn">⚠️$1</span>')
+    .replace(/🔴([^\n]*)/g, '<span class="err">🔴$1</span>')
+    .replace(/🟡([^\n]*)/g, '<span class="warn">🟡$1</span>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+}
+
+async function callGemini(userMsg) {
+  history.push({ role: 'user', parts: [{ text: userMsg }] });
+  showTyping();
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: SYSTEM }] },
+          contents: history
+        })
+      }
+    );
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const reply = data.candidates[0].content.parts[0].text;
+    removeTyping();
+    addMsg('bot', fmt(reply), true);
+    history.push({ role: 'model', parts: [{ text: reply }] });
+  } catch (e) {
+    removeTyping();
+    addMsg('bot', 'Erreur : ' + e.message);
+  }
+}
+
+async function init() {
+  showTyping();
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: SYSTEM }] },
+          contents: [{ role: 'user', parts: [{ text: 'Démarre en te présentant en une phrase courte et pose ta première question.' }] }]
+        })
+      }
+    );
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const reply = data.candidates[0].content.parts[0].text;
+    removeTyping();
+    addMsg('bot', fmt(reply), true);
+    history.push({ role: 'model', parts: [{ text: reply }] });
+  } catch (e) {
+    removeTyping();
+    addMsg('bot', 'Erreur de connexion : ' + e.message);
+  }
+}
+
+document.getElementById('send').addEventListener('click', () => {
+  const val = userInp.value.trim();
+  if (!val) return;
+  addMsg('user', val);
+  userInp.value = '';
+  callGemini(val);
+});
+
+userInp.addEventListener('keypress', e => { if (e.key === 'Enter') document.getElementById('send').click(); });
+</script>
+</body>
+</html>
